@@ -60,6 +60,46 @@ h2 { font-size: clamp(1.9rem, 3.2vw, 2.5rem); }
   }
   nav a:hover, nav a:focus-visible{color:var(--purple);}
 
+  /* ---------- MOBILE NAV TOGGLE ---------- */
+  .nav-toggle{
+    display:none;
+    background:none; border:none; cursor:pointer;
+    width:30px; height:22px; position:relative; padding:0; z-index:60;
+  }
+  .nav-toggle span{
+    position:absolute; left:0; width:100%; height:2px;
+    background:var(--text); border-radius:2px;
+    transition:transform 0.25s ease, opacity 0.25s ease, top 0.25s ease;
+  }
+  .nav-toggle span:nth-child(1){top:0;}
+  .nav-toggle span:nth-child(2){top:10px;}
+  .nav-toggle span:nth-child(3){top:20px;}
+  .nav-toggle.open span:nth-child(1){top:10px; transform:rotate(45deg);}
+  .nav-toggle.open span:nth-child(2){opacity:0;}
+  .nav-toggle.open span:nth-child(3){top:10px; transform:rotate(-45deg);}
+
+  @media (max-width:700px){
+    nav{padding:16px 5vw;}
+    .nav-toggle{display:block;}
+    nav ul{
+      position:fixed; top:0; right:0; height:100vh; width:min(72vw, 280px);
+      background:var(--panel);
+      flex-direction:column; align-items:flex-start; justify-content:center;
+      gap:26px; padding:40px 32px;
+      box-shadow:-8px 0 30px rgba(0,0,0,0.12);
+      transform:translateX(100%);
+      transition:transform 0.3s ease;
+    }
+    nav ul.open{transform:translateX(0);}
+    nav a{font-size:0.9rem;}
+    .nav-scrim{
+      position:fixed; inset:0; background:rgba(17,10,32,0.4);
+      opacity:0; visibility:hidden; transition:opacity 0.25s ease, visibility 0.25s ease;
+      z-index:55;
+    }
+    .nav-scrim.open{opacity:1; visibility:visible;}
+  }
+
   /* ---------- HERO ---------- */
   .hero{
     position:relative;
@@ -340,10 +380,24 @@ h2 { font-size: clamp(1.9rem, 3.2vw, 2.5rem); }
   }
 
   @media (max-width:800px){
-    nav ul{gap:16px;}
     .about-grid{grid-template-columns:1fr;}
     .section-head{flex-direction:column; align-items:flex-start;}
     .section-head p{text-align:left; margin-left:0;}
+  }
+
+  @media (max-width:700px){
+    section.block{padding:44px 6vw;}
+    .hero{min-height:auto; padding:6vw 6vw 8vw;}
+    .hero-grid{padding:20px 0; gap:36px; min-height:auto;}
+    .hero-content h1{font-size:clamp(2.2rem, 8vw, 2.8rem);}
+    .hero-actions{flex-direction:column; align-items:stretch;}
+    .btn{width:100%;}
+    .hero .tags{justify-content:center;}
+    .grid{grid-template-columns:1fr; gap:20px;}
+    .card:hover{transform:none;}
+    footer{padding:56px 6vw 40px;}
+    footer .contact-links{padding:22px 20px; width:100%;}
+    .copyline{flex-direction:column; text-align:center; gap:6px;}
   }
 
   /* ---------- LIGHTBOX (images + video, Drive-style pop) ---------- */
@@ -425,7 +479,10 @@ h2 { font-size: clamp(1.9rem, 3.2vw, 2.5rem); }
 
 <nav>
   <div class="brand">PRINCE<span>.</span>DUGA</div>
-  <ul>
+  <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <ul id="navMenu">
     <li><a href="#about">About</a></li>
     <li><a href="#graphic">Design</a></li>
     <li><a href="#video">Video</a></li>
@@ -433,6 +490,7 @@ h2 { font-size: clamp(1.9rem, 3.2vw, 2.5rem); }
     <li><a href="#contact">Contact</a></li>
   </ul>
 </nav>
+<div class="nav-scrim" id="navScrim"></div>
 
 <section class="hero">
   <div class="hero-grid">
@@ -600,7 +658,7 @@ h2 { font-size: clamp(1.9rem, 3.2vw, 2.5rem); }
     <!-- 5th Commencement -->
     <div class="card reveal">
       <div class="media">
-        <img src="images/Copy 5th Commencement (1).png" alt="5th University Commencement - Software Elites" style="cursor:pointer;" onclick="openImageLightbox(this.src, this.alt)">
+        <img src="images/Copy of 5th Commencement  (1).png" alt="5th University Commencement - Software Elites" style="cursor:pointer;" onclick="openImageLightbox(this.src, this.alt)">
       </div>
       <div class="body">
         <h3>5th Commencement — Software Elites</h3>
@@ -865,6 +923,31 @@ h2 { font-size: clamp(1.9rem, 3.2vw, 2.5rem); }
 
 <script>
   // Note: LED grid effect removed for cleaner professional design
+
+  // Mobile nav toggle
+  const navToggle = document.getElementById('navToggle');
+  const navMenu = document.getElementById('navMenu');
+  const navScrim = document.getElementById('navScrim');
+
+  function closeNav(){
+    navToggle.classList.remove('open');
+    navMenu.classList.remove('open');
+    navScrim.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+  function toggleNav(){
+    const isOpen = navMenu.classList.toggle('open');
+    navToggle.classList.toggle('open', isOpen);
+    navScrim.classList.toggle('open', isOpen);
+    navToggle.setAttribute('aria-expanded', String(isOpen));
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  }
+  if(navToggle){
+    navToggle.addEventListener('click', toggleNav);
+    navScrim.addEventListener('click', closeNav);
+    navMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeNav));
+  }
 
   const overlay = document.getElementById('lightboxOverlay');
   const content = document.getElementById('lightboxContent');
